@@ -1,11 +1,11 @@
 *©2023 Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. All other trademarks are the property of their respective owners.*
 
-# Image to Amazon Web Services (AWS) Rekognition service - Detection of Personal Protective Equipment (PPE)
+# Hard hat detection using Axis Object Analytics and AWS Rekognition
 
 ## 1. Overview
 
-This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to AWS cloud services. The image upload to AWS cloud is triggered via the edge analytic software **Axis Object Analytic** running on the Axis camera.\
-After the PPE detection is made by Amazon Rekognition service within the cloud, the result is transferred via MQTT to an AXIS Network Strobe Siren [D4100-E](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) that will signal a positive (green) or negative (red) result if the PPE (helmet) was on or off.
+This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to AWS cloud services. The image upload to AWS cloud is triggered via the edge analytic software [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.\
+After the PPE detection is made by Amazon Rekognition service, the result is transferred via MQTT to an AXIS Network Strobe Siren [D4100-E](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) that will signal a positive (green) or negative (red) result if the PPE (helmet) was on or off.
 
 ![PPE detection video](assets/ppe_video.gif)
 
@@ -31,16 +31,17 @@ Modifying the Lambda function that calls the rekognition service is also possibl
 
 The solution is divided in the below sections which will be described in detail during this tutorial.
 
-### **3.1 Camera image to AWS S3 bucket**
+### 3.1 Camera image to AWS S3 bucket
 
-### **3.2 AWS IoT Core (MQTT Broker) and MQTT client**
+### 3.2 AWS IoT Core (MQTT Broker) and MQTT client
 
-### **3.3 AWS PPE detection (Interference)**
+### 3.3 AWS PPE detection (Interference)
 
-### **3.4 AXIS Object Analytics and event setup**
+### 3.4 AXIS Object Analytics and event setup
 
-### **3.5 Strobe siren event and MQTT subscribe**
+### 3.5 Strobe siren event and MQTT subscribe
 
+\
 ![architecture](assets/architecture.png)\
 *Detailed overview where all cloud services are shown.*
 
@@ -51,6 +52,8 @@ Below image illustrates the upload of a camera image to an AWS S3 bucket.
 ![Image upload to aws S3](assets/aws-image-upload.png)
 
 How to setup the Simple Storage Service (S3) and the needed peripheral services to handle the authentication is described in the repository found here: [Sending images from a camera to AWS S3](<https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3>)
+
+> **Note** Follow the instructions in the repository **Sending images from a camera to AWS S3** until the section called **Configure the camera**. After that return back to this tutorial to setup the rest of the solution.
 
 ### **3.2 AWS IoT Core (MQTT Broker) and MQTT client**
 
@@ -109,7 +112,7 @@ Next, configure the camera's MQTT client:
 7. Click **Save**.
 8. Turn on **Connect**.
 
-Here' an example of an **MQTT client** setup in an Axis device.
+Here's an example of an **MQTT client** setup in an Axis device.
 
 ![axis device mqtt client settings](assets/axis-device-mqtt-client-settings.png)\
 *©2023 Axis Communications AB. All rights reserved.*
@@ -200,14 +203,14 @@ module.exports = {
 
 Finally, you need to setup correct permissions for the Lambda function to access the S3 bucket, IoT Core (MQTT Broker) and the Rekognition service.  
 
-1. Go to Configuration->Permissions and click on the Execution role.
-2. In the IAM (Identity and Access Management) console you should add permissions for the three services:
+1. Go to **Configuration** > **Permissions** and click on the **Execution role**.
+2. In the **IAM** (Identity and Access Management) console you should add permissions for the three services:
     - S3 (`s3:GetObject` and `s3:GetObjectVersion`)
     - Rekognition (`rekognition:DetectProtectiveEquipment`)
     - IoT Core (`iot:Publish`)
-3. Click add permissions dropdown and select Attach policies.
-4. Now click Create Policy and add S3 as a service and read access to `GetObject` and `GetObjectVersion`.
-5. Click next -> next until you can set a name for your policy.
+3. Click **add permissions** dropdown and select **Attach policies**.
+4. Now click **Create Policy** and add S3 as a service and read access to `GetObject` and `GetObjectVersion`.
+5. Click **next** > **next** until you can set a name for your policy.
 6. Save the policy and attach the policy to your role.
 
 Create two more policy’s (one for the Rekognition service and one for the IoT Core service) and attach them to your Lambda function role.
@@ -217,41 +220,44 @@ Create two more policy’s (one for the Rekognition service and one for the IoT 
 
 ### 3.4 Axis Object Analytics and event setup
 
-**Axis Object Analytic Line Crossing**
+\
+**Line Crossing in Axis Object Analytic**
 
-1. In the Axis camera, start the AXIS Object Analytic application by navigating to Apps and click open.
-2. Setup a line crossing in the scene for when you want to capture an image that is sent to AWS S3.
+1. In the Axis camera, start the AXIS Object Analytic application by navigating to **Apps** and click **open**.
+2. Setup a line crossing in the scene for when you want to capture an image that is sent to AWS S3.\
 
-![AXIS Object Analytic - Line crossing](assets/axis-line-crossing.png)
+![AXIS Object Analytic - Line crossing](assets/axis-line-crossing.png)\
+*Example of line crossing setup in AXIS Object Analytic application*
 
 **Axis camera event setup**
 
-In the camera, setup a HTTPS recipient to the AWS API Gateway and an event that is used as a trigger when an image should be uploaded.
+Now it is time to setup a HTTPS recipient to the AWS API Gateway and an event that is used as a trigger when an image should be uploaded.
 
-1. Navigate to the **System** > **Events**.
+1. In the camera navigate to **System** > **Events**.
 2. In the **Recipients** tab click the plus sign to add the API Gateway recipient URL.
     > **Note** No username and password are needed here, the authentication is handled via the access token `accessToken` that you will enter in the **Rules** section under **Custom CGI parameters**.
-4. In the **Rules** tab click the plus sign to add an condition for when to send an image to S3.
-Set post buffer to 1 second and the **Maximum images** to 1.
-1. Add the `accessToken` under **Custom CGI parameters**. E.g. `accessToken=abcdefghijklmnopqrstuvxyz123`
+3. In the **Rules** tab click the plus sign to add new rule.
+    - Select an condition for when to send an image to S3. E.g. **Object Analytics: Scenario x**.
+    - Set post buffer to 1 second and the **Maximum images** to 1.
+    - Add the `accessToken` under **Custom CGI parameters**. E.g. `accessToken=abcdefghijklmnopqrstuvxyz123`
 
 The camera is now configured to send an image every time a person is crossing the line that was setup in the Axis Object Analytic application.
 
 ### 3.5 Strobe siren event and MQTT subscribe
 
-This section explains how to setup MQTT subscribe in the Strobe Siren and how to tie the MQTT topic to different event that controls the strobe sirens light or sound.
+This section explains how to setup MQTT subscribe in the strobe siren and how to tie the MQTT topic to different event that controls the strobe sirens light or sound.
 
 **MQTT subscribe setup**
 
 1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription.
-2. Set a MQTT topic that correspond to the Rekognition Lambda function topic. E.g. ppe/alarm/on and ppe/alarm/off.
+2. Set a MQTT topic that correspond to the Rekognition Lambda function topic. E.g. `ppe/alarm/on` and `ppe/alarm/off`.
     > **Note** Remember to uncheck the tick box “Use default topic prefix”.
 3. Repeat the subscription configuration for one more color so that the trigger from the AWS Rekognition service can change color based on PPE detection.
 
 **Strobe siren profile setup**
 
-1. In the strobe siren add a new profile, give it a name (example "green-light"), and configure the desired signaling.
-2. Create a second profile for some other color or sound (example "red-light").
+1. In the strobe siren add a new profile, give it a name (example `green-light`), and configure the desired signaling.
+2. Create a second profile for some other color or sound (example `red-light`).
 
 **Event setup**
 
@@ -261,7 +267,7 @@ This section explains how to setup MQTT subscribe in the Strobe Siren and how to
 
 ## 4. Test and validation
 
-Test the solution by trigger the line crossing in the Axis Object Analytic application. The output should be a red or green light on the strobe siren depending if you have a helmet on or off.
+Test the solution by trigger the line crossing in the AXIS Object Analytic application. The output should be a red or green light on the strobe siren depending if you have a helmet on or off.
 
 To investigate the MQTT messages on the IoT Core MQTT broker you can login to the Amazon console and go to AWS IoT. From here you can see all the traffic on the broker if you subscribe with the wildcard **#**.
 
