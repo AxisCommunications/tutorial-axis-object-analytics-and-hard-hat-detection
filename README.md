@@ -2,6 +2,22 @@
 
 # Hard hat detection using Axis Object Analytics and AWS Rekognition
 
+## Table of contents
+
+- [Hard hat detection using Axis Object Analytics and AWS Rekognition](#hard-hat-detection-using-axis-object-analytics-and-aws-rekognition)
+  - [Table of contents](#table-of-contents)
+  - [1. Overview](#1-overview)
+  - [2. Prerequisites](#2-prerequisites)
+  - [3. Solution setup](#3-solution-setup)
+    - [3.1 Camera image to AWS S3 bucket](#31-camera-image-to-aws-s3-bucket)
+    - [3.2 AWS IoT Core (MQTT Broker) and MQTT client](#32-aws-iot-core-mqtt-broker-and-mqtt-client)
+    - [3.3 AWS PPE detection (Interference)](#33-aws-ppe-detection-interference)
+    - [3.4 Axis Object Analytics and event setup](#34-axis-object-analytics-and-event-setup)
+    - [3.5 Strobe siren event and MQTT subscribe](#35-strobe-siren-event-and-mqtt-subscribe)
+  - [4. Test and validation](#4-test-and-validation)
+  - [Disclaimer](#disclaimer)
+  - [License](#license)
+
 ## 1. Overview
 
 This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to AWS cloud services. The image upload to AWS cloud is triggered via the edge analytic software [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.\
@@ -31,21 +47,17 @@ Modifying the Lambda function that calls the rekognition service is also possibl
 
 The solution is divided in the below sections which will be described in detail during this tutorial.
 
-### 3.1 Camera image to AWS S3 bucket
-
-### 3.2 AWS IoT Core (MQTT Broker) and MQTT client
-
-### 3.3 AWS PPE detection (Interference)
-
-### 3.4 AXIS Object Analytics and event setup
-
-### 3.5 Strobe siren event and MQTT subscribe
+3.1 Camera image to AWS S3 bucket\
+3.2 AWS IoT Core (MQTT Broker) and MQTT client\
+3.3 AWS PPE detection (Interference)\
+3.4 AXIS Object Analytics and event setup\
+3.5 Strobe siren event and MQTT subscribe
 
 \
 ![architecture](assets/architecture.png)\
 *Detailed overview where all cloud services are shown.*
 
-### **3.1 Camera image to AWS S3 bucket**
+### 3.1 Camera image to AWS S3 bucket
 
 Below image illustrates the upload of a camera image to an AWS S3 bucket.
 
@@ -55,7 +67,7 @@ How to setup the Simple Storage Service (S3) and the needed peripheral services 
 
 > **Note** Follow the instructions in the repository **Sending images from a camera to AWS S3** until the section called **Configure the camera**. After that return back to this tutorial to setup the rest of the solution.
 
-### **3.2 AWS IoT Core (MQTT Broker) and MQTT client**
+### 3.2 AWS IoT Core (MQTT Broker) and MQTT client
 
 In this section we will setup an AWS IoT Core service and connect it to the MQTT client in the Axis Strobe Siren.
 
@@ -117,7 +129,7 @@ Here's an example of an **MQTT client** setup in an Axis device.
 ![axis device mqtt client settings](assets/axis-device-mqtt-client-settings.png)\
 *©2023 Axis Communications AB. All rights reserved.*
 
-### **3.3 AWS PPE detection (Interference)**
+### 3.3 AWS PPE detection (Interference)
 
 This section explains how to setup and configure the Lambda function to grab an image from the S3 bucket, input the image to the rekognition service and finally transfer the result of the detection (helmet on or off) to the IoT core (MQTT broker).
 
