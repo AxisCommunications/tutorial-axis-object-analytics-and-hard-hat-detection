@@ -4,7 +4,7 @@
 
 ## Table of contents
 
-- [Hard hat detection using Axis Object Analytics and AWS Rekognition](#hard-hat-detection-using-axis-object-analytics-and-aws-rekognition)
+- [Hard hat detection using AXIS Object Analytics and AWS Rekognition](#hard-hat-detection-using-axis-object-analytics-and-aws-rekognition)
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
   - [Prerequisites](#prerequisites)
