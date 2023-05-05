@@ -1,6 +1,6 @@
 *©2023 Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. All other trademarks are the property of their respective owners.*
 
-# Hard hat detection using Axis Object Analytics and AWS Rekognition
+# Hard hat detection using AXIS Object Analytics and AWS Rekognition
 
 ## Table of contents
 
