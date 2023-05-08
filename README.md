@@ -20,6 +20,8 @@
 
 ## Overview
 
+ewigwliejgweljgewldkdrtdr
+
 This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to AWS cloud services. The image upload to AWS cloud is triggered via the edge analytic software [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.\
 After the PPE detection is made by Amazon Rekognition service, the result is transferred via MQTT to an AXIS Network Strobe Siren [D4100-E](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) that will signal a positive (green) or negative (red) result if the PPE (helmet) was on or off.
 
