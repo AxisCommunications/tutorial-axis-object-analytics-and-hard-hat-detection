@@ -1,10 +1,10 @@
 *©2023 Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. All other trademarks are the property of their respective owners.*
 
-# Hard hat detection using Axis Object Analytics and AWS Rekognition
+# Hard hat detection using Axis Object Analytics and AWS Rekognition MARIA TEST
 
 ## Table of contents
 
-- [Hard hat detection using Axis Object Analytics and AWS Rekognition](#hard-hat-detection-using-axis-object-analytics-and-aws-rekognition)
+- [Hard hat detection using Axis Object Analytics and AWS Rekognition MARIA TEST](#hard-hat-detection-using-axis-object-analytics-and-aws-rekognition-maria-test)
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
   - [Prerequisites](#prerequisites)
@@ -20,9 +20,7 @@
 
 ## Overview
 
-maria testar git hub review PPE
-
-This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to AWS cloud services. The image upload to AWS cloud is triggered via the edge analytic software [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.\
+This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to AWS cloud services. The image upload to AWS cloud is triggered via the edge analytics software [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.\
 After the PPE detection is made by Amazon Rekognition service, the result is transferred via MQTT to an AXIS Network Strobe Siren [D4100-E](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) that will signal a positive (green) or negative (red) result if the PPE (helmet) was on or off.
 
 ![PPE detection video](assets/ppe_video.gif)
