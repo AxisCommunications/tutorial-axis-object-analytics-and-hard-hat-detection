@@ -42,7 +42,7 @@ UPPDATERA BILD NEDAN (AOA står fel)
 2. [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren)
 3. Access to AWS cloud services.
 
-> **Note:** The Amazon Rekognition service isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html) for all AWS services used in this guide.
+> **Note** The Amazon Rekognition service isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html) for all AWS services used in this guide.
 >
 > [Click here](https://www.axis.com/products/axis-object-analytics#compatible-products) to see AXIS Object Analytics compatible cameras.
 
