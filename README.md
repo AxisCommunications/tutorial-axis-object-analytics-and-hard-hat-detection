@@ -120,7 +120,7 @@ In the Axis device, install the client and CA certificates to enable a secure MQ
 Next, configure the camera's MQTT client:
 *ETT EXEMPEL PÅ CAMERA OCH DEVICE. Bättre att använda ett och samma uttryck genom hela dokumentet.*
 
-1. In the Axis device go to **System** > **MQTT**.
+1. In the Axis camera go to **System** > **MQTT**.
 2. In the **Host** field, enter the hostname for the IoT Core MQTT broker. You can find the hostname (endpoint) to the MQTT broker in the AWS Console under **IoT Core** > **Settings**.
 3. In the **Protocol** drop-down menu, select **MQTT over SSL** using default port **8883**.
 4. In the **Client certificate** field, select the previously uploaded client certificate.
