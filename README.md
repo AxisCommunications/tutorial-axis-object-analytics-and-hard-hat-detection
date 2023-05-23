@@ -94,7 +94,7 @@ In this section we will setup an AWS IoT Core service and connect it to the MQTT
         - **Policy action**: `iot:Publish`
         - **Policy resource**: `*`
 
-    > **Warning:** Not restricting the policy resource is acceptable in an exploratory phase, but applying [least-privilege permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege) is a requirement before going to production.
+    > **Warning** Not restricting the policy resource is acceptable in an exploratory phase, but applying [least-privilege permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege) is a requirement before going to production.
 
 7. Return to the previous page to attach the applicable policies and click **Create thing**.
 8. Download the **Device certificate**, **Public key file**, **Private key file** and the **Root CA certificate**.
