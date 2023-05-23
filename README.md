@@ -69,7 +69,7 @@ The image below illustrates the upload of a camera image to an Amazon S3 bucket.
 
 How to setup the Amazon S3 and the required peripheral services to handle the authentication is described here: [Sending images from a camera to Amazon S3](<https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3>)
 
-> **Note:** Follow the instructions in the repository **Sending images from a camera to Amazon S3** up until the section called **Configure the camera**. After that, return back to this tutorial to setup the rest of the solution.
+> **Note** Follow the instructions in the repository **Sending images from a camera to Amazon S3** up until the section called **Configure the camera**. After that, return back to this tutorial to setup the rest of the solution.
 
 ### AWS IoT Core (MQTT Broker) and MQTT client
 
