@@ -268,7 +268,7 @@ This section explains how to setup MQTT subscribe in the strobe siren and how to
 
 1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription.
 2. Set a MQTT topic that correspond to the Rekognition Lambda function topic. E.g. `ppe/alarm/on` and `ppe/alarm/off`.
-    > **Note:** Remember to uncheck the tick box “Use default topic prefix”.
+    > **Note** Remember to uncheck the tick box “Use default topic prefix”.
 3. Repeat the subscription configuration for one more color so that the trigger from the Amazon Rekognition service can change color based on PPE detection.
 
 **Strobe siren profile setup**
