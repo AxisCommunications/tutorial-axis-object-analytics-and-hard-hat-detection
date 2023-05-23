@@ -252,7 +252,7 @@ Now it is time to setup a HTTPS recipient to the AWS API Gateway and an event th
 
 1. In the camera navigate to **System** > **Events**.
 2. In the **Recipients** tab click the plus sign to add the API Gateway recipient URL.
-    > **Note:** Username and password is not needed here, the authentication is handled via the access token `accessToken` that you will enter in the **Rules** section under **Custom CGI parameters**.
+    > **Note** Username and password is not needed here, the authentication is handled via the access token `accessToken` that you will enter in the **Rules** section under **Custom CGI parameters**.
 3. In the **Rules** tab click the plus sign to add a new rule.
     - Select an condition for when to send an image to Amazon S3. E.g. **AXIS Object Analytics: Scenario x**.
     - Set post buffer to 1 second and the **Maximum images** to 1.
