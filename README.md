@@ -29,7 +29,7 @@ After the PPE detection is made by Amazon Rekognition service, the result is tra
 
 The architectural overview below illustrates the components (hardware and software) and protocols needed in order to setup the solution.
 
-> **Note:** *Some components can be replaced to get a solution that fits other use-cases.
+> **Note** *Some components can be replaced to get a solution that fits other use-cases.
 For example, replace AXIS Object Analytics  with another application that triggers when an image should be sent to the AWS cloud. Or replace the Axis Strobe Siren with an Axis door station to change the output and result of the solution.
 Modifying the Lambda function that calls the rekognition service is also possible if the use case requires other detection types.*
 UPPDATERA BILD NEDAN (AOA står fel)
