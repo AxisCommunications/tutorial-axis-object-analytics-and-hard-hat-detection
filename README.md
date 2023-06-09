@@ -10,7 +10,7 @@
 - [Prerequisites](#prerequisites)
 - [Solution setup](#solution-setup)
     - [Camera image to Amazon S3 bucket](#camera-image-to-amazon-s3-bucket)
-    - [AWS IoT Core (MQTT Broker) and MQTT client](#aws-iot-core-mqtt-broker-and-mqtt-client)
+    - [AWS IoT Core (MQTT broker) and MQTT client](#aws-iot-core-mqtt-broker-and-mqtt-client)
     - [AWS PPE detection (inference)](#aws-ppe-detection-inference)
     - [AXIS Object Analytics (Camera application) and event setup](#axis-object-analytics-camera-application-and-event-setup)
     - [Strobe siren event and MQTT subscribe](#strobe-siren-event-and-mqtt-subscribe)
@@ -28,8 +28,9 @@ After the PPE detection is made by Amazon Rekognition, the result is transferred
 
 The architectural overview below illustrates the components (hardware and software) and protocols needed in order to setup the solution.
 
-> **Note** Some components can be replaced to get a solution that fits other use-cases.
-For example, replace AXIS Object Analytics  with another application that triggers when an image should be sent to the AWS cloud. Or replace the Axis Strobe Siren with an Axis door station to change the output and result of the solution.
+> **Note**
+>
+> Some components can be replaced to get a solution that fits other use-cases. For example, replace AXIS Object Analytics with another application that triggers when an image should be sent to AWS. Or replace the Axis Strobe Siren with an Axis door station to change the output and result of the solution.
 >
 > Modifying the Lambda function that calls the Amazon Rekognition is also possible if the use case requires other detection types.
 
@@ -37,20 +38,16 @@ For example, replace AXIS Object Analytics  with another application that trigge
 
 ## Prerequisites
 
-1. Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics)
-2. [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren)
-3. Access to AWS cloud services.
-
-> **Note** Amazon Rekognition isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html) for all AWS services used in this guide.
->
-> [Click here](https://www.axis.com/products/axis-object-analytics#compatible-products) to see AXIS Object Analytics compatible cameras.
+- Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) - Click [here](https://www.axis.com/products/axis-object-analytics#compatible-products) to find compatible cameras.
+- [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren)
+- Access to AWS - Amazon Rekognition isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html) for all AWS services used in this guide.
 
 ## Solution setup
 
 The solution is divided into the sections below which will be described in detail during this tutorial.
 
 - Camera image to Amazon Simple Storage Service (S3) bucket
-- AWS IoT Core (MQTT Broker) and MQTT client
+- AWS IoT Core (MQTT broker) and MQTT client
 - AWS PPE detection (inference)
 - AXIS Object Analytics (Camera application) and event setup
 - Strobe siren event and MQTT subscribe
@@ -64,11 +61,11 @@ The image below illustrates the upload of a camera image to an Amazon S3 bucket.
 
 ![Image upload to amazon S3](assets/aws-image-upload.png)
 
-How to setup the Amazon S3 and the required peripheral services to handle the authentication is described here: [Sending images from a camera to Amazon S3](<https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3>)
+How to setup the Amazon S3 and the required peripheral services to handle the authentication is described here: [Sending images from a camera to Amazon S3](https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3).
 
-> **Note** Follow the instructions in the repository **Sending images from a camera to Amazon S3** up until the section called **Configure the camera**. After that, return back to this tutorial to setup the rest of the solution.
+> **Note** Follow the instructions up until the section called **Configure the camera**. After that, return back to this tutorial to setup the rest of the solution.
 
-### AWS IoT Core (MQTT Broker) and MQTT client
+### AWS IoT Core (MQTT broker) and MQTT client
 
 In this section we will setup AWS IoT Core and connect it to the MQTT client in the Axis Strobe Siren.
 
@@ -134,7 +131,7 @@ Here's an example of an **MQTT client** setup in an Axis device.
 
 This section explains how to setup and configure the Lambda function to grab an image from the Amazon S3 bucket, input the image to Amazon Rekognition and finally transfer the result of the detection (helmet on or off) to AWS IoT Core (MQTT broker).
 
-![Lamda and Amazon Rekognition](assets/aws-lamda_rekognition.png)
+![Lambda and Amazon Rekognition](assets/aws-lambda_rekognition.png)
 
 #### Create a Lambda function
 
@@ -149,7 +146,7 @@ This section explains how to setup and configure the Lambda function to grab an 
 #### Setup the Lambda function
 
 1. Add a trigger to the Amazon S3 bucket where you store the uploaded images.
-2. Add below code to the index.js file within your Lambda function.
+2. Add below code to the `index.js` file within your Lambda function.
 
     ```javascript
     const AWS = require("aws-sdk");
@@ -214,7 +211,7 @@ This section explains how to setup and configure the Lambda function to grab an 
 
 #### Lambda function permissions
 
-Finally, you need to setup correct permissions for the Lambda function to access the Amazon S3 bucket, AWS IoT Core (MQTT Broker) and Amazon Rekognition.
+Finally, you need to setup correct permissions for the Lambda function to access the Amazon S3 bucket, AWS IoT Core (MQTT broker) and Amazon Rekognition.
 
 1. Go to **Configuration** > **Permissions** and click on the **Execution role**.
 2. In the **IAM** (Identity and Access Management) console you should add permissions for the three services:
