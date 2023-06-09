@@ -20,17 +20,18 @@
 
 ## Overview
 
-This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to Amazon Web Services (AWS) cloud services. The image upload to AWS cloud is triggered by [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.
+This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to [Amazon Web Services (AWS)](https://aws.amazon.com/) cloud services. The image upload to AWS is triggered by [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.
 
-After the PPE detection is made by Amazon Rekognition, the result is transferred via MQTT to [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) which will signal a positive (green) or negative (red) result if the PPE (helmet) is on or off.
+After the PPE detection is made by Amazon Rekognition, the result is transferred via MQTT to [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) which will signal a positive (green) or negative (red) result depending on whether the PPE (helmet) is on or off.
 
 ![PPE detection video](assets/ppe_video.gif)
 
 The architectural overview below illustrates the components (hardware and software) and protocols needed in order to setup the solution.
 
-> **Note** *Some components can be replaced to get a solution that fits other use-cases.
+> **Note** Some components can be replaced to get a solution that fits other use-cases.
 For example, replace AXIS Object Analytics  with another application that triggers when an image should be sent to the AWS cloud. Or replace the Axis Strobe Siren with an Axis door station to change the output and result of the solution.
-Modifying the Lambda function that calls the Amazon Rekognition is also possible if the use case requires other detection types.*
+>
+> Modifying the Lambda function that calls the Amazon Rekognition is also possible if the use case requires other detection types.
 
 ![Solution overview](assets/architecture-overview.png)
 
