@@ -119,13 +119,13 @@ docker run --rm \
 Start by [forking the repository](https://docs.github.com/github/getting-started-with-github/fork-a-repo), i.e. copying the repository to your account to grant you write access. Continue with cloning the forked repository to your local machine.
 
 ```sh
-git clone https://github.com/<your username>/tutorial-axis-object-analytics-to-grafana.git
+git clone https://github.com/<your username>/tutorial-axis-object-analytics-and-hard-hat-detection.git
 ```
 
 Navigate into the cloned directory and create a new branch:
 
 ```sh
-cd tutorial-axis-object-analytics-to-grafana
+cd tutorial-axis-object-analytics-and-hard-hat-detection
 git switch -c <branch name>
 ```
 
@@ -151,12 +151,8 @@ And finally when you are satisfied with your changes, open a new PR.
 
 <!-- markdownlint-disable MD034 -->
 
-<!-- Update later
-
-[issues]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-to-grafana/issues
-[issues_new]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-to-grafana/issues/new
-[issues_bugs]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-to-grafana/issues?q=label%3Abug
-[discussions]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-to-grafana/discussions
-[discussions_new]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-to-grafana/discussions/new -->
-
-<!-- markdownlint-enable MD034 -->
+[issues]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-and-hard-hat-detection/issues
+[issues_new]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-and-hard-hat-detection/issues/new
+[issues_bugs]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-and-hard-hat-detection/issues?q=label%3Abug
+[discussions]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-and-hard-hat-detection/discussions
+[discussions_new]: https://github.com/AxisCommunications/tutorial-axis-object-analytics-and-hard-hat-detection/discussions/new
