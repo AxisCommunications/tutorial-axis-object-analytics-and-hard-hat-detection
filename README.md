@@ -20,8 +20,6 @@
 
 ## Overview
 
-***Föreslår att använda antingen camera eller device i hela dokumentet***
-
 This tutorial describes a solution for how to detect Personal Protective Equipment (PPE) in an image sent from an Axis camera to Amazon Web Services (AWS) cloud services. The image upload to AWS cloud is triggered by [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) running on the camera.\
 After the PPE detection is made by Amazon Rekognition service, the result is transferred via MQTT to [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) which will signal a positive (green) or negative (red) result if the PPE (helmet) is on or off.
 
@@ -32,7 +30,6 @@ The architectural overview below illustrates the components (hardware and softwa
 > **Note** *Some components can be replaced to get a solution that fits other use-cases.
 For example, replace AXIS Object Analytics  with another application that triggers when an image should be sent to the AWS cloud. Or replace the Axis Strobe Siren with an Axis door station to change the output and result of the solution.
 Modifying the Lambda function that calls the rekognition service is also possible if the use case requires other detection types.*
-UPPDATERA BILD NEDAN (AOA står fel)
 
 ![Solution overview](assets/architecture-overview.png)
 
@@ -50,16 +47,15 @@ UPPDATERA BILD NEDAN (AOA står fel)
 
 The solution is divided into the sections below which will be described in detail during this tutorial.
 
-3.1 Camera image to Amazon Simple Storage Service (S3) bucket\
-3.2 AWS IoT Core (MQTT Broker) and MQTT client\
-3.3 AWS PPE detection (Interference)\
-3.4 AXIS Object Analytics and event setup\
-3.5 Strobe siren event and MQTT subscribe
+- Camera image to Amazon Simple Storage Service (S3) bucket\
+- AWS IoT Core (MQTT Broker) and MQTT client\
+- AWS PPE detection (Interference)\
+- AXIS Object Analytics (Camera application) and event setup\
+- Strobe siren event and MQTT subscribe
 
 \
 ![architecture](assets/architecture.png)\
 *Detailed overview where all cloud services are shown.*
-Saknas inte AOA under camera application? Var hör 3.4 hemma då?
 
 ### Camera image to Amazon S3 bucket
 
@@ -117,10 +113,9 @@ In the Axis device, install the client and CA certificates to enable a secure MQ
 7. Upload the root CA certificate (`AmazonRootCA1.pem`).
 8. Click **Next** and then **Install**.
 
-Next, configure the camera's MQTT client:
-*ETT EXEMPEL PÅ CAMERA OCH DEVICE. Bättre att använda ett och samma uttryck genom hela dokumentet.*
+Next, configure the device's MQTT client:
 
-1. In the Axis camera go to **System** > **MQTT**.
+1. In the Axis device go to **System** > **MQTT**.
 2. In the **Host** field, enter the hostname for the IoT Core MQTT broker. You can find the hostname (endpoint) to the MQTT broker in the AWS Console under **IoT Core** > **Settings**.
 3. In the **Protocol** drop-down menu, select **MQTT over SSL** using default port **8883**.
 4. In the **Client certificate** field, select the previously uploaded client certificate.
@@ -235,8 +230,7 @@ Create two more policies (one for the Amazon Rekognition service and one for the
 - The Amazon Rekognition policy should have at least read access to action: `rekognition:DetectProtectiveEquipment`
 - The IoT policy should have write access to action: `iot:Publish`
 
-### Axis Object Analytics and event setup
-
+### AXIS Object Analytics (Camera application) and event setup
 \
 **Line Crossing in Axis Object Analytics**
 
@@ -284,9 +278,9 @@ This section explains how to setup MQTT subscribe in the strobe siren and how to
 
 ## Test and validation
 
-Test the solution by triggering the line crossing in AXIS Object Analytics. The output should be a red or green light on the strobe siren depending if you have a helmet on or not.
+Test the solution by triggering the line crossing in AXIS Object Analytics. The output should be a red or green light on the Axis strobe siren depending if you have a helmet on or not.
 
-To investigate the MQTT messages on the IoT Core MQTT broker you can login to the Amazon console and go to AWS IoT. Here you can see all the traffic on the broker if you subscribe with the wildcard **#**.
+To investigate the MQTT messages on the IoT Core MQTT broker you can login to the Amazon console and go to AWS IoT. Here you can see all the traffic on the broker if you subscribe with the wildcard `#`.
 
 ![AWS MQTT test client](assets/aws-mqtt-test-client.png)
 *Screenshot from AWS Console*
