@@ -10,7 +10,7 @@
 - [Prerequisites](#prerequisites)
 - [Solution setup](#solution-setup)
     - [Camera image to Amazon S3 bucket](#camera-image-to-amazon-s3-bucket)
-    - [AWS IoT Core (MQTT broker) and MQTT client](#aws-iot-core-mqtt-broker-and-mqtt-client)
+    - [AWS IoT Core and MQTT client](#aws-iot-core-and-mqtt-client)
     - [Amazon Rekognition PPE detection (inference)](#amazon-rekognition-ppe-detection-inference)
     - [AXIS Object Analytics (camera application) and event setup](#axis-object-analytics-camera-application-and-event-setup)
     - [Strobe siren event and MQTT subscribe](#strobe-siren-event-and-mqtt-subscribe)
@@ -47,7 +47,7 @@ The architectural overview below illustrates the components (hardware and softwa
 The solution is divided into the sections below which will be described in detail during this tutorial.
 
 - Camera image to Amazon Simple Storage Service (Amazon S3) bucket
-- AWS IoT Core (MQTT broker) and MQTT client
+- AWS IoT Core, acting as a MQTT broker, and MQTT client
 - Amazon Rekognition PPE detection (inference)
 - AXIS Object Analytics (camera application) and event setup
 - Strobe siren event and MQTT subscribe
@@ -65,7 +65,7 @@ How to setup the Amazon S3 and the required peripheral services to handle the au
 
 > **Note** Follow the instructions up until the section called **Configure the camera**. After that, return back to this tutorial to setup the rest of the solution.
 
-### AWS IoT Core (MQTT broker) and MQTT client
+### AWS IoT Core and MQTT client
 
 In this section we will setup AWS IoT Core and connect it to the MQTT client in the Axis strobe siren.
 
@@ -100,7 +100,7 @@ In this section we will setup AWS IoT Core and connect it to the MQTT client in 
 
 #### Setup MQTT client in Axis device
 
-In the Axis device, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core MQTT broker:
+In the Axis device, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core:
 
 1. Log in to the Axis device and go to **System** > **Security**.
 2. Click **Add certificate**.
@@ -114,7 +114,7 @@ In the Axis device, install the client and CA certificates to enable a secure MQ
 Next, configure the device's MQTT client:
 
 1. In the Axis device go to **System** > **MQTT**.
-2. In the **Host** field, enter the hostname for the AWS IoT Core MQTT broker. You can find the hostname (endpoint) to the MQTT broker in the AWS Management Console under **IoT Core** > **Settings**.
+2. In the **Host** field, enter the hostname for AWS IoT Core. You can find the hostname (device data endpoint) in the AWS Management Console under **IoT Core** > **Settings**.
 3. In the **Protocol** drop-down menu, select **MQTT over SSL** using default port **8883**.
 4. In the **Client certificate** field, select the previously uploaded client certificate.
 5. In the **CA certificate** field, select the previously uploaded CA certificate.
@@ -129,7 +129,7 @@ Here's an example of an **MQTT client** setup in an Axis device.
 
 ### Amazon Rekognition PPE detection (inference)
 
-This section explains how to setup and configure the AWS Lambda function to grab an image from the Amazon S3 bucket, input the image to Amazon Rekognition and finally transfer the result of the detection (helmet on or off) to AWS IoT Core (MQTT broker).
+This section explains how to setup and configure the AWS Lambda function to grab an image from the Amazon S3 bucket, input the image to Amazon Rekognition and finally transfer the result of the detection (helmet on or off) to AWS IoT Core.
 
 ![AWS Lambda and Amazon Rekognition](assets/aws-lambda_rekognition.png)
 
@@ -211,7 +211,7 @@ This section explains how to setup and configure the AWS Lambda function to grab
 
 #### AWS Lambda function permissions
 
-Finally, you need to setup correct permissions for the AWS Lambda function to access the Amazon S3 bucket, AWS IoT Core (MQTT broker) and Amazon Rekognition.
+Finally, you need to setup correct permissions for the AWS Lambda function to access the Amazon S3 bucket, AWS IoT Core and Amazon Rekognition.
 
 1. Go to **Configuration** > **Permissions** and click on the **Execution role**.
 2. In the **IAM** (Identity and Access Management) console you should add permissions for the three services:
@@ -278,7 +278,7 @@ This section explains how to setup MQTT subscribe in the strobe siren and how to
 
 Test the solution by triggering the line crossing in AXIS Object Analytics. The output should be a red or green light on the Axis strobe siren depending if you have a helmet on or not.
 
-To investigate the MQTT messages on the AWS IoT Core MQTT broker you can login to the AWS Management Console and go to AWS IoT Core. Here you can see all the traffic on the broker if you subscribe with the wildcard `#`.
+To investigate the MQTT messages sent to AWS IoT Core you can login to the AWS Management Console and go to AWS IoT Core. Here you can see all the messages if you subscribe with the wildcard `#`.
 
 ![AWS MQTT test client](assets/aws-mqtt-test-client.png)\
 *Screenshot from AWS Management Console*
