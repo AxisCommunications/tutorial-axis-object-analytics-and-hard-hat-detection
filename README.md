@@ -46,7 +46,7 @@ The architectural overview below illustrates the components (hardware and softwa
 
 The solution is divided into the sections below which will be described in detail during this tutorial.
 
-- Camera image to Amazon Simple Storage Service (S3) bucket
+- Camera image to Amazon Simple Storage Service (Amazon S3) bucket
 - AWS IoT Core (MQTT broker) and MQTT client
 - Amazon Rekognition PPE detection (inference)
 - AXIS Object Analytics (camera application) and event setup
@@ -287,7 +287,7 @@ To investigate the MQTT messages on the AWS IoT Core MQTT broker you can login t
 
 <!-- textlint-disable -->
 
-This document and its content are provided courtesy of Axis and all rights to the document shall remain vested in Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. Amazon Web Services, AWS and the Powered by AWS logo are trademarks of Amazon.com, Inc. or its affiliates. All other trademarks are the property of their respective owners, and we are not affiliated with, endorsed or sponsored by them or their affiliates.
+This document and its content are provided courtesy of Axis and all rights to the document shall remain vested in Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. Amazon Web Services, AWS and the Powered by AWS logo, Amazon Simple Storage Service (Amazon S3), Amazon Rekognition and AWS Lambda are trademarks of Amazon.com, Inc. or its affiliates. All other trademarks are the property of their respective owners, and we are not affiliated with, endorsed or sponsored by them or their affiliates.
 
 As described in this document, you may be able to connect to, access and use third party products, web sites, example code, software or services (“Third Party Services”). You acknowledge that any such connection and access to such Third Party Services are made available to you for convenience only. Axis does not endorse any Third Party Services, nor does Axis make any representations or provide any warranties whatsoever with respect to any Third Party Services, and Axis specifically disclaims any liability or obligations with regard to Third Party Services. The Third Party Services are provided to you in accordance with their respective terms and conditions, and you alone are responsible for ensuring that you (a) procure appropriate rights to access and use any such Third Party Services and (b) comply with the terms and conditions applicable to its use.
 
