@@ -10,9 +10,9 @@
 - [Prerequisites](#prerequisites)
 - [Solution setup](#solution-setup)
     - [Camera image to Amazon S3 bucket](#camera-image-to-amazon-s3-bucket)
-    - [AWS IoT Core (MQTT broker) and MQTT client](#aws-iot-core-mqtt-broker-and-mqtt-client)
-    - [AWS PPE detection (inference)](#aws-ppe-detection-inference)
-    - [AXIS Object Analytics (Camera application) and event setup](#axis-object-analytics-camera-application-and-event-setup)
+    - [AWS IoT Core and MQTT client](#aws-iot-core-and-mqtt-client)
+    - [Amazon Rekognition PPE detection (inference)](#amazon-rekognition-ppe-detection-inference)
+    - [AXIS Object Analytics (camera application) and event setup](#axis-object-analytics-camera-application-and-event-setup)
     - [Strobe siren event and MQTT subscribe](#strobe-siren-event-and-mqtt-subscribe)
 - [Test and validation](#test-and-validation)
 - [Disclaimer](#disclaimer)
@@ -30,9 +30,9 @@ The architectural overview below illustrates the components (hardware and softwa
 
 > **Note**
 >
-> Some components can be replaced to get a solution that fits other use-cases. For example, replace AXIS Object Analytics with another application that triggers when an image should be sent to AWS. Or replace the Axis Strobe Siren with an Axis door station to change the output and result of the solution.
+> Some components can be replaced to get a solution that fits other use-cases. For example, replace AXIS Object Analytics with another application that triggers when an image should be sent to AWS. Or replace the Axis strobe siren with an Axis door station to change the output and result of the solution.
 >
-> Modifying the Lambda function that calls the Amazon Rekognition is also possible if the use case requires other detection types.
+> Modifying the AWS Lambda function that calls the Amazon Rekognition is also possible if the use case requires other detection types.
 
 ![Solution overview](assets/architecture-overview.png)
 
@@ -46,10 +46,10 @@ The architectural overview below illustrates the components (hardware and softwa
 
 The solution is divided into the sections below which will be described in detail during this tutorial.
 
-- Camera image to Amazon Simple Storage Service (S3) bucket
-- AWS IoT Core (MQTT broker) and MQTT client
-- AWS PPE detection (inference)
-- AXIS Object Analytics (Camera application) and event setup
+- Camera image to Amazon Simple Storage Service (Amazon S3) bucket
+- AWS IoT Core, acting as a MQTT broker, and MQTT client
+- Amazon Rekognition PPE detection (inference)
+- AXIS Object Analytics (camera application) and event setup
 - Strobe siren event and MQTT subscribe
 
 ![architecture](assets/architecture.png)\
@@ -59,21 +59,21 @@ The solution is divided into the sections below which will be described in detai
 
 The image below illustrates the upload of a camera image to an Amazon S3 bucket.
 
-![Image upload to amazon S3](assets/aws-image-upload.png)
+![Image upload to Amazon S3](assets/aws-image-upload.png)
 
 How to setup the Amazon S3 and the required peripheral services to handle the authentication is described here: [Sending images from a camera to Amazon S3](https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3).
 
 > **Note** Follow the instructions up until the section called **Configure the camera**. After that, return back to this tutorial to setup the rest of the solution.
 
-### AWS IoT Core (MQTT broker) and MQTT client
+### AWS IoT Core and MQTT client
 
-In this section we will setup AWS IoT Core and connect it to the MQTT client in the Axis Strobe Siren.
+In this section we will setup AWS IoT Core and connect it to the MQTT client in the Axis strobe siren.
 
 ![AWS IoT Core](assets/aws-iot-core.png)
 
 #### Setup an AWS IoT Core thing
 
-1. Sign in to the [AWS Console](https://aws.amazon.com/console/) and search for **IoT Core**.
+1. Sign in to the [AWS Management Console](https://aws.amazon.com/console/) and search for **IoT Core**.
 2. Go to **Manage** > **All devices** > **Things** and click **Create things**.
 3. Select **Create single thing** and click **Next**.
 4. Enter a unique name and click **Next**.
@@ -94,13 +94,13 @@ In this section we will setup AWS IoT Core and connect it to the MQTT client in 
 8. Download the **Device certificate**, **Public key file**, **Private key file** and the **Root CA certificate**.
 
     ![download aws certificates](assets/aws-download-certificates.png)\
-    *Screenshot from AWS Console*
+    *Screenshot from AWS Management Console*
 
 9. Click **Done**.
 
 #### Setup MQTT client in Axis device
 
-In the Axis device, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core MQTT broker:
+In the Axis device, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core:
 
 1. Log in to the Axis device and go to **System** > **Security**.
 2. Click **Add certificate**.
@@ -114,7 +114,7 @@ In the Axis device, install the client and CA certificates to enable a secure MQ
 Next, configure the device's MQTT client:
 
 1. In the Axis device go to **System** > **MQTT**.
-2. In the **Host** field, enter the hostname for the AWS IoT Core MQTT broker. You can find the hostname (endpoint) to the MQTT broker in the AWS Console under **IoT Core** > **Settings**.
+2. In the **Host** field, enter the hostname for AWS IoT Core. You can find the hostname (device data endpoint) in the AWS Management Console under **IoT Core** > **Settings**.
 3. In the **Protocol** drop-down menu, select **MQTT over SSL** using default port **8883**.
 4. In the **Client certificate** field, select the previously uploaded client certificate.
 5. In the **CA certificate** field, select the previously uploaded CA certificate.
@@ -127,26 +127,26 @@ Here's an example of an **MQTT client** setup in an Axis device.
 ![axis device mqtt client settings](assets/axis-device-mqtt-client-settings.png)\
 *©2023 Axis Communications AB. All rights reserved.*
 
-### AWS PPE detection (inference)
+### Amazon Rekognition PPE detection (inference)
 
-This section explains how to setup and configure the Lambda function to grab an image from the Amazon S3 bucket, input the image to Amazon Rekognition and finally transfer the result of the detection (helmet on or off) to AWS IoT Core (MQTT broker).
+This section explains how to setup and configure the AWS Lambda function to grab an image from the Amazon S3 bucket, input the image to Amazon Rekognition and finally transfer the result of the detection (helmet on or off) to AWS IoT Core.
 
-![Lambda and Amazon Rekognition](assets/aws-lambda_rekognition.png)
+![AWS Lambda and Amazon Rekognition](assets/aws-lambda_rekognition.png)
 
-#### Create a Lambda function
+#### Create an AWS Lambda function
 
-1. Sign in to the [AWS Console](https://aws.amazon.com/console/) and search for Lambda.
-2. Create a new Lambda function.
+1. Sign in to the [AWS Management Console](https://aws.amazon.com/console/) and search for Lambda.
+2. Create a new AWS Lambda function.
     - Select Author from scratch
     - Set a name for the function
     - Select Node.js 14.x as runtime
     - Select x86_64 as architecture.
     - Click Create function.
 
-#### Setup the Lambda function
+#### Setup the AWS Lambda function
 
 1. Add a trigger to the Amazon S3 bucket where you store the uploaded images.
-2. Add below code to the `index.js` file within your Lambda function.
+2. Add below code to the `index.js` file within your AWS Lambda function.
 
     ```javascript
     const AWS = require("aws-sdk");
@@ -204,14 +204,14 @@ This section explains how to setup and configure the Lambda function to grab an 
     };
     ```
 
-3. Go to **Configuration** of the Lambda function and setup two **Environment variables**. One for the bucket name and one for the AWS IoT Core endpoint.
+3. Go to **Configuration** of the AWS Lambda function and setup two **Environment variables**. One for the bucket name and one for the AWS IoT Core endpoint.
 
 ![AWS Lambda, Environment variables](assets/aws-env-var.png)\
-*Screenshot from AWS Console*
+*Screenshot from AWS Management Console*
 
-#### Lambda function permissions
+#### AWS Lambda function permissions
 
-Finally, you need to setup correct permissions for the Lambda function to access the Amazon S3 bucket, AWS IoT Core (MQTT broker) and Amazon Rekognition.
+Finally, you need to setup correct permissions for the AWS Lambda function to access the Amazon S3 bucket, AWS IoT Core and Amazon Rekognition.
 
 1. Go to **Configuration** > **Permissions** and click on the **Execution role**.
 2. In the **IAM** (Identity and Access Management) console you should add permissions for the three services:
@@ -223,12 +223,12 @@ Finally, you need to setup correct permissions for the Lambda function to access
 5. Click **next** > **next** until you can set a name for your policy.
 6. Save the policy and attach the policy to your role.
 
-Create two more policies (one for Amazon Rekognition and one for AWS IoT Core) and attach them to your Lambda function role.
+Create two more policies (one for Amazon Rekognition and one for AWS IoT Core) and attach them to your AWS Lambda function role.
 
 - The Amazon Rekognition policy should have at least read access to action: `rekognition:DetectProtectiveEquipment`
-- The AWS IoT policy should have write access to action: `iot:Publish`
+- The AWS IoT Core policy should have write access to action: `iot:Publish`
 
-### AXIS Object Analytics (Camera application) and event setup
+### AXIS Object Analytics (camera application) and event setup
 
 #### Line Crossing in AXIS Object Analytics
 
@@ -240,13 +240,13 @@ Create two more policies (one for Amazon Rekognition and one for AWS IoT Core) a
 
 #### Axis camera event setup
 
-Now it is time to setup a HTTPS recipient to the AWS API Gateway and an event that is used as a trigger when an image should be uploaded.
+Now it is time to setup a HTTPS recipient to the Amazon API Gateway and an event that is used as a trigger when an image should be uploaded.
 
 1. In the camera navigate to **System** > **Events**.
-2. In the **Recipients** tab click the plus sign to add the API Gateway recipient URL.
+2. In the **Recipients** tab click the plus sign to add the Amazon API Gateway recipient URL.
     > **Note** Username and password is not needed here, the authentication is handled via the access token `accessToken` that you will enter in the **Rules** section under **Custom CGI parameters**.
 3. In the **Rules** tab click the plus sign to add a new rule.
-    - Select an condition for when to send an image to Amazon S3. E.g. **AXIS Object Analytics: Scenario x**.
+    - Select a condition for when to send an image to Amazon S3. E.g. **AXIS Object Analytics: Scenario x**.
     - Set post buffer to 1 second and the **Maximum images** to 1.
     - Add the `accessToken` under **Custom CGI parameters**. E.g. `accessToken=abcdefghijklmnopqrstuvxyz123`
 
@@ -259,7 +259,7 @@ This section explains how to setup MQTT subscribe in the strobe siren and how to
 #### MQTT subscribe setup
 
 1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription.
-2. Set a MQTT topic that correspond to the Rekognition Lambda function topic. E.g. `ppe/alarm/on` and `ppe/alarm/off`.
+2. Set a MQTT topic that correspond to the Amazon Rekognition AWS Lambda function topic. E.g. `ppe/alarm/on` and `ppe/alarm/off`.
     > **Note** Remember to uncheck the tick box “Use default topic prefix”.
 3. Repeat the subscription configuration for one more color so that the trigger from Amazon Rekognition can change color based on PPE detection.
 
@@ -278,16 +278,16 @@ This section explains how to setup MQTT subscribe in the strobe siren and how to
 
 Test the solution by triggering the line crossing in AXIS Object Analytics. The output should be a red or green light on the Axis strobe siren depending if you have a helmet on or not.
 
-To investigate the MQTT messages on the AWS IoT Core MQTT broker you can login to the Amazon console and go to AWS IoT. Here you can see all the traffic on the broker if you subscribe with the wildcard `#`.
+To investigate the MQTT messages sent to AWS IoT Core you can login to the AWS Management Console and go to AWS IoT Core. Here you can see all the messages if you subscribe with the wildcard `#`.
 
 ![AWS MQTT test client](assets/aws-mqtt-test-client.png)\
-*Screenshot from AWS Console*
+*Screenshot from AWS Management Console*
 
 ## Disclaimer
 
 <!-- textlint-disable -->
 
-This document and its content are provided courtesy of Axis and all rights to the document shall remain vested in Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. All other trademarks are the property of their respective owners. Amazon Web Services, AWS and the Powered by AWS logo are trademarks of Amazon.com, Inc. or its affiliates.
+This document and its content are provided courtesy of Axis and all rights to the document shall remain vested in Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. Amazon Web Services, AWS and the Powered by AWS logo, Amazon Simple Storage Service (Amazon S3), Amazon Rekognition and AWS Lambda are trademarks of Amazon.com, Inc. or its affiliates. All other trademarks are the property of their respective owners, and we are not affiliated with, endorsed or sponsored by them or their affiliates.
 
 As described in this document, you may be able to connect to, access and use third party products, web sites, example code, software or services (“Third Party Services”). You acknowledge that any such connection and access to such Third Party Services are made available to you for convenience only. Axis does not endorse any Third Party Services, nor does Axis make any representations or provide any warranties whatsoever with respect to any Third Party Services, and Axis specifically disclaims any liability or obligations with regard to Third Party Services. The Third Party Services are provided to you in accordance with their respective terms and conditions, and you alone are responsible for ensuring that you (a) procure appropriate rights to access and use any such Third Party Services and (b) comply with the terms and conditions applicable to its use.
 
