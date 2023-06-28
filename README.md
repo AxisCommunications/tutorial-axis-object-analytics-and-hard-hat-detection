@@ -40,7 +40,7 @@ The architectural overview below shows the required components (hardware and sof
 
 - Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) - Click [here](https://www.axis.com/products/axis-object-analytics#compatible-products) to find compatible cameras.
 - [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren)
-- Access to AWS - Amazon Rekognition isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html) for all AWS services used in this guide.
+- Access to AWS - Amazon Rekognition isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html).
 
 ## Solution setup
 
@@ -137,11 +137,11 @@ This section explains how to set up and configure the AWS Lambda function to gra
 
 1. Sign in to the [AWS Management Console](https://aws.amazon.com/console/) and search for Lambda.
 2. Create a new AWS Lambda function.
-    - Select Author from scratch
-    - Set a name for the function
-    - Select Node.js 14.x as runtime
-    - Select x86_64 as architecture.
-    - Click Create function.
+    - Select **Author from scratch**.
+    - Set a name for the function.
+    - Select **Node.js 14.x** as runtime.
+    - Select **x86_64** as architecture.
+    - Click **Create function**.
 
 #### Set up the AWS Lambda function
 
