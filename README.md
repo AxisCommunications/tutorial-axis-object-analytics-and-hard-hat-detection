@@ -140,68 +140,69 @@ This section explains how to set up and configure the AWS Lambda function to gra
 2. Create a new AWS Lambda function.
     - Select **Author from scratch**.
     - Set a name for the function.
-    - Select **Node.js 14.x** as runtime.
+    - Select **Node.js 18.x** as runtime.
     - Select **x86_64** as architecture.
     - Click **Create function**.
 
 #### Set up the AWS Lambda function
 
 1. Add a trigger to the Amazon S3 bucket where you store the uploaded images.
-2. Add the code below to the `index.js` file within your AWS Lambda function.
+2. Add the code below to the `index.mjs` file within your AWS Lambda function.
 
     ```javascript
-    const AWS = require("aws-sdk");
+    import { RekognitionClient, DetectProtectiveEquipmentCommand } from "@aws-sdk/client-rekognition";
+    import { IoTDataPlaneClient, PublishCommand } from "@aws-sdk/client-iot-data-plane";
 
     const BUCKET_NAME = process.env.BUCKET_NAME;
     const IOT_CORE_DEVICE_DATA_ENDPOINT = process.env.IOT_CORE_DEVICE_DATA_ENDPOINT;
 
-    const rekognition = new AWS.Rekognition();
-    const iotData = new AWS.IotData({
-    endpoint: IOT_CORE_DEVICE_DATA_ENDPOINT,
+    const rekognitionClient = new RekognitionClient();
+    const ioTDataPlaneClient = new IoTDataPlaneClient({
+        endpoint: `https://${IOT_CORE_DEVICE_DATA_ENDPOINT}`,
     });
 
     const anyPersonWithoutProtectiveEquipment = async (objectKey) => {
-    const req = {
-        Image: {
-        S3Object: {
-            Bucket: BUCKET_NAME,
-            Name: objectKey,
-        },
-        },
-        SummarizationAttributes: {
-        MinConfidence: 50,
-        RequiredEquipmentTypes: ["HEAD_COVER"],
-        },
-    };
+        const input = {
+            Image: {
+                S3Object: {
+                    Bucket: BUCKET_NAME,
+                    Name: objectKey,
+                },
+            },
+            SummarizationAttributes: {
+                MinConfidence: 50,
+                RequiredEquipmentTypes: ["HEAD_COVER"],
+            },
+        };
 
-    const res = await rekognition.detectProtectiveEquipment(req).promise();
-    return res.Summary.PersonsWithoutRequiredEquipment.length > 0;
+        const command = new DetectProtectiveEquipmentCommand(input);
+
+        const res = await rekognitionClient.send(command);
+        return res.Summary.PersonsWithoutRequiredEquipment.length > 0;
     };
 
     const publishMessage = async (alarm) => {
-    const message = {
-        topic: alarm ? "ppe/alarm/on" : "ppe/alarm/off",
-        payload: JSON.stringify({ message: "PPE detection payload" }),
+        const input = {
+            topic: alarm ? "ppe/alarm/on" : "ppe/alarm/off",
+            payload: JSON.stringify({ message: "PPE detection payload" }),
+        };
+
+        const command = new PublishCommand(input);
+
+        await ioTDataPlaneClient.send(command);
     };
 
-    await iotData.publish(message).promise();
-    };
+    export const handler = async (event) => {
+        if (!event || !event.Records || event.Records.length !== 1) {
+            console.log(`unexpected event structure: ${JSON.stringify(event)}`);
+            return;
+        }
 
-    const handler = async (event) => {
-    if (!event || !event.Records || event.Records.length !== 1) {
-        console.log(`unexpected event structure: ${JSON.stringify(event)}`);
-        return;
-    }
+        const objectKey = event.Records[0].s3.object.key;
+        console.log(`bucket: ${BUCKET_NAME}, object key: ${objectKey}`);
 
-    const objectKey = event.Records[0].s3.object.key;
-    console.log(`bucket: ${BUCKET_NAME}, object key: ${objectKey}`);
-
-    const alarm = await anyPersonWithoutProtectiveEquipment(objectKey);
-    await publishMessage(alarm);
-    };
-
-    module.exports = {
-    handler,
+        const alarm = await anyPersonWithoutProtectiveEquipment(objectKey);
+        await publishMessage(alarm);
     };
     ```
 
@@ -214,27 +215,28 @@ This section explains how to set up and configure the AWS Lambda function to gra
 
 Finally, set up the correct permissions for the AWS Lambda function to access the Amazon S3 bucket, AWS IoT Core and Amazon Rekognition.
 
-1. Go to **Configuration** > **Permissions** and click the **Execution role**.
-2. In the **IAM** (Identity and Access Management) console, add permissions for the three services:
-    - Amazon S3 (`s3:GetObject` and `s3:GetObjectVersion`)
-    - Amazon Rekognition (`rekognition:DetectProtectiveEquipment`)
-    - AWS IoT Core (`iot:Publish`)
-3. Select **Attach policies** from the **add permissions** dropdown.
-4. Click **Create Policy** and add Amazon S3 as a service and read access to `GetObject` and `GetObjectVersion`.
-5. Click **next** > **next** until you can set a name for your policy.
-6. Save the policy and attach the policy to your role.
-
-Create two more policies (one for Amazon Rekognition and one for AWS IoT Core) and attach them to your AWS Lambda function role.
-
-- The Amazon Rekognition policy should have at least read access to the `rekognition:DetectProtectiveEquipment` action.
-- The AWS IoT Core policy should have write access to the `iot:Publish` action.
+1. Go to **Configuration** > **Permissions** and click the **Role name** in **Execution role**.
+2. In the **IAM** (Identity and Access Management) role, select **Create inline policy** from the **Add permissions** dropdown.
+3. Specify the following permission and create the policy:
+    - `S3`
+        - `Read`
+            - `GetObject`
+            - `GetObjectVersion`
+    - `Rekognition`
+        - `Read`
+            - `DetectProtectiveEquipment`
+    - `IoT`
+        - `Write`
+            - `Publish`
+4. With the policy created and attached to the role, you're done configuring the AWS Lambda permissions.
 
 ### AXIS Object Analytics (camera application) and event setup
 
 #### Line Crossing in AXIS Object Analytics
 
-1. In the Axis camera, go to **Apps** and click **open** to start the AXIS Object Analytics application.
-2. Set up a line crossing scenario where you want to capture an image and send it to Amazon S3.
+1. In the Axis camera, go to **Apps** and make sure that `AXIS Object Analytics` is running.
+2. Click **Open** to configure AXIS Object Analytics.
+3. Set up a line crossing scenario where you want to capture an image and send it to Amazon S3.
 
 ![AXIS Object Analytic - Line crossing](assets/axis-line-crossing.png)\
 *Example of a line crossing scenario in AXIS Object Analytics*
