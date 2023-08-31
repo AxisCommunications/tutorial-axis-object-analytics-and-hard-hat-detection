@@ -46,10 +46,10 @@ The architectural overview below shows the required components (hardware and sof
 These are the main steps of this tutorial:
 
 - Camera image to Amazon Simple Storage Service (Amazon S3) bucket
-- AWS IoT Core, acting as a MQTT broker, and MQTT client
+- AWS IoT Core, acting as a MQTT broker
 - Amazon Rekognition PPE detection (inference)
 - AXIS Object Analytics (camera application) and event setup
-- Strobe siren event and MQTT subscribe
+- Strobe siren event and MQTT subscription
 
 ![architecture](assets/architecture.png)\
 *Detailed overview showing all cloud services.*
@@ -85,13 +85,13 @@ In this section we'll set up AWS IoT Core and connect it to the MQTT client in t
         - **Policy resource**: `*`
     - Second statement
         - **Policy effect**: `Allow`
-        - **Policy action**: `iot:Publish`
+        - **Policy action**: `iot:Subscribe`
         - **Policy resource**: `*`
 
     >[!WARNING]
     > Not restricting the policy resource is acceptable in an exploratory phase, but applying [least-privilege permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege) is a requirement before going to production.
 
-7. Return to the previous page to attach the applicable policies and click **Create thing**.
+7. Return to the previous page to attach the applicable policy and click **Create thing**.
 8. Download the **Device certificate**, **Public key file**, **Private key file** and the **Root CA certificate**.
 
     ![download aws certificates](assets/aws-download-certificates.png)\
@@ -99,9 +99,9 @@ In this section we'll set up AWS IoT Core and connect it to the MQTT client in t
 
 9. Click **Done**.
 
-#### Set up an MQTT client in an Axis device
+#### Set up the MQTT client in the Axis strobe siren
 
-In the Axis device, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core:
+In the Axis strobe siren, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core:
 
 1. Log in to the Axis device and go to **System** > **Security**.
 2. Click **Add certificate**.
@@ -110,7 +110,7 @@ In the Axis device, install the client and CA certificates to enable a secure MQ
 5. Click **Install** and then **Close**.
 6. Click **Add certificate** again and select **Upload a CA certificate**.
 7. Upload the root CA certificate (`AmazonRootCA1.pem`).
-8. Click **Next** and then **Install**.
+8. Click **Next** and then **Install** and **Close**.
 
 Next, configure the device's MQTT client:
 
