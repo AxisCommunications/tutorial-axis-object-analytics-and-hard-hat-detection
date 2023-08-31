@@ -28,7 +28,7 @@ Amazon Rekognition transfers the result to [AXIS D4100-E Network Strobe Siren](h
 
 The architectural overview below shows the required components (hardware and software) and protocols to set up the solution.
 
-> **Note**
+> [!NOTE]
 >
 > You can replace some components to develop solutions for other use cases. For example, replace AXIS Object Analytics with another application to send images to AWS. Or replace the Axis strobe siren with an Axis door station to change the output and result of the solution.
 >
@@ -38,7 +38,7 @@ The architectural overview below shows the required components (hardware and sof
 
 ## Prerequisites
 
-- Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) - Click [here](https://www.axis.com/products/axis-object-analytics#compatible-products) to find compatible cameras.
+- Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) - Click [here](https://www.axis.com/products/axis-object-analytics#compatible-products) to find cameras featuring the *line crossing* scenario.
 - [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren)
 - Access to AWS - Amazon Rekognition isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html).
 
@@ -63,7 +63,7 @@ The image below illustrates the upload of a camera image to an Amazon S3 bucket.
 
 [Sending images from a camera to Amazon S3](https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3) describes how to set up the Amazon S3 and the required peripheral services to handle the authentication.
 
-> **Note** Follow the instructions up until the section called **Configure the camera**. Afterward, return to this tutorial to set up the rest of the solution.
+> [!NOTE] Follow the instructions up until the section called **Configure the camera**. Afterward, return to this tutorial to set up the rest of the solution.
 
 ### AWS IoT Core and MQTT client
 
@@ -244,7 +244,7 @@ Now it is time to set up an HTTPS recipient to the Amazon API Gateway and an eve
 
 1. In the Axis camera go to **System** > **Events**.
 2. On the **Recipients** tab click **+** to add the Amazon API Gateway recipient URL.
-    > **Note** You don't need to enter a username and password here. The access token `accessToken` in the **Rules** section under **Custom CGI parameters** handles the authentication.
+    > [!NOTE] You don't need to enter a username and password here. The access token `accessToken` in the **Rules** section under **Custom CGI parameters** handles the authentication.
 3. On the **Rules** tab click **+** to add a new rule.
     - Select a condition for sending an image to Amazon S3, for example, **AXIS Object Analytics: Scenario x**.
     - Set the post buffer to 1 second and the **Maximum images** to 1.
@@ -260,7 +260,7 @@ This section explains how to set up MQTT subscribe in the strobe siren and tie t
 
 1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription.
 2. Set an MQTT topic that corresponds to the Amazon Rekognition AWS Lambda function topic, for example, `ppe/alarm/on` and `ppe/alarm/off`.
-    > **Note** Remember to clear “Use default topic prefix”.
+    > [!NOTE] Remember to clear “Use default topic prefix”.
 3. Repeat the subscription configuration for one more color so that the trigger from Amazon Rekognition can change color based on PPE detection.
 
 #### Set up a strobe siren profile
