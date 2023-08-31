@@ -63,11 +63,11 @@ The image below illustrates the upload of a camera image to an Amazon S3 bucket.
 [Sending images from a camera to Amazon S3](https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3) describes how to set up the Amazon S3 and the required peripheral services to handle the authentication.
 
 > [!NOTE]
-> Follow the instructions up until the section called **Configure the camera**. Afterward, return to this tutorial to set up the rest of the solution.
+> Follow the instructions up until the section called **Configure the camera**. Keep note on the AWS CloudFormation stack output parameters named `Recipient`, `AccessToken` and `Bucket` as you will need them later on in this tutorial.
 
 ### AWS IoT Core and MQTT client
 
-In this section we'll set up AWS IoT Core and connect it to the MQTT client in the Axis strobe siren.
+In this section we'll set up AWS IoT Core and have the Axis strobe siren connect to it using its MQTT client.
 
 ![AWS IoT Core](assets/aws-iot-core.png)
 
@@ -101,7 +101,7 @@ In this section we'll set up AWS IoT Core and connect it to the MQTT client in t
 
 #### Set up the MQTT client in the Axis strobe siren
 
-In the Axis strobe siren, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core:
+In the Axis strobe siren, install the client and CA certificates to enable a secure MQTT connection to AWS IoT Core:
 
 1. Log in to the Axis device and go to **System** > **Security**.
 2. Click **Add certificate**.
@@ -213,29 +213,26 @@ This section explains how to set up and configure the AWS Lambda function to gra
 
 #### AWS Lambda function permissions
 
-Finally, set up the correct permissions for the AWS Lambda function to access the Amazon S3 bucket, AWS IoT Core and Amazon Rekognition.
+Finally, set up the correct permissions for the AWS Lambda function to access the Amazon S3 bucket, Amazon Rekognition and AWS IoT Core.
 
 1. Go to **Configuration** > **Permissions** and click the **Role name** in **Execution role**.
 2. In the **IAM** (Identity and Access Management) role, select **Create inline policy** from the **Add permissions** dropdown.
-3. Specify the following permission and create the policy:
-    - `S3`
-        - `Read`
-            - `GetObject`
-            - `GetObjectVersion`
-    - `Rekognition`
-        - `Read`
-            - `DetectProtectiveEquipment`
-    - `IoT`
-        - `Write`
-            - `Publish`
+3. Specify the following permissions and create the policy:
+    - **Service**: `S3`
+        - `GetObject`
+        - `GetObjectVersion`
+    - **Service**: `Rekognition`
+        - `DetectProtectiveEquipment`
+    - **Service**: `IoT`
+        - `Publish`
 4. With the policy created and attached to the role, you're done configuring the AWS Lambda permissions.
 
 ### AXIS Object Analytics (camera application) and event setup
 
 #### Line Crossing in AXIS Object Analytics
 
-1. In the Axis camera, go to **Apps** and make sure that `AXIS Object Analytics` is running.
-2. Click **Open** to configure AXIS Object Analytics.
+1. In the Axis camera, go to **Apps** and make sure that the application named `AXIS Object Analytics` is running.
+2. Click **Open** to configure the application.
 3. Set up a line crossing scenario where you want to capture an image and send it to Amazon S3.
 
 ![AXIS Object Analytic - Line crossing](assets/axis-line-crossing.png)\
@@ -246,13 +243,17 @@ Finally, set up the correct permissions for the AWS Lambda function to access th
 Now it is time to set up an HTTPS recipient to the Amazon API Gateway and an event that triggers an image upload.
 
 1. In the Axis camera go to **System** > **Events**.
-2. On the **Recipients** tab click **+** to add the Amazon API Gateway recipient URL.
-    > [!NOTE]
-    > You don't need to enter a username and password here. The access token `accessToken` in the **Rules** section under **Custom CGI parameters** handles the authentication.
-3. On the **Rules** tab click **+** to add a new rule.
-    - Select a condition for sending an image to Amazon S3, for example, **AXIS Object Analytics: Scenario x**.
-    - Set the post buffer to 1 second and the **Maximum images** to 1.
-    - Add the `accessToken` under **Custom CGI parameters**, for example, `accessToken=abcdefghijklmnopqrstuvxyz123`
+2. On the **Recipients** tab click **Add recipient**, pointing to the Amazon API Gateway.
+    - **Name**: `AWS S3`
+    - **Type**: `HTTPS`
+    - **URL**: The AWS CloudFormation stack output parameter named `Recipient`, from back when we created the Amazon S3 bucket.
+3. On the **Rules** tab click **Add a rule** with the following settings:
+    - **Name**: `AXIS Object Analytics: Line crossing`
+    - **Condition**: The Object Analytics scenario created in AXIS Object Analytics
+    - **Action**: `Send images through HTTPS`
+        - **Recipient**: `AWS S3`
+        - **Maximum images**: `1`
+        - **Custom CGI parameters**: The AWS CloudFormation stack output parameter named `AccessToken` points to a secret in AWS Secrets Manager. Follow the link, retrieve the secret value and format it according to `accessToken=<secret value>`. E.g. if the secret value is `FooBar` then the value you should enter here is `accessToken=FooBar`. Please note that copying the secret from AWS Secrets Manager sometimes adds a space in the beginning of the secret. Please make sure to remove this space before saving the rule.
 
 The camera will now send an image every time a person crosses the line that you created in AXIS Object Analytics.
 
