@@ -13,7 +13,7 @@
     - [AWS IoT Core and MQTT client](#aws-iot-core-and-mqtt-client)
     - [Amazon Rekognition PPE detection (inference)](#amazon-rekognition-ppe-detection-inference)
     - [AXIS Object Analytics (camera application) and event setup](#axis-object-analytics-camera-application-and-event-setup)
-    - [Strobe siren event and MQTT subscribe](#strobe-siren-event-and-mqtt-subscribe)
+    - [Strobe siren event and MQTT subscription](#strobe-siren-event-and-mqtt-subscription)
 - [Test and validation](#test-and-validation)
 - [Disclaimer](#disclaimer)
 - [License](#license)
@@ -257,17 +257,18 @@ Now it is time to set up an HTTPS recipient to the Amazon API Gateway and an eve
 
 The camera will now send an image every time a person crosses the line that you created in AXIS Object Analytics.
 
-### Strobe siren event and MQTT subscribe
+### Strobe siren event and MQTT subscription
 
-This section explains how to set up MQTT subscribe in the strobe siren and tie the MQTT topic to different events that control the strobe siren's light or sound.
+This section explains how to set up the MQTT subscription in the Axis strobe siren and tie the MQTT topic to different events that control the strobe siren's light or sound.
 
-#### Set up MQTT subscribe
+#### Set up MQTT subscription
 
-1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription.
-2. Set an MQTT topic that corresponds to the Amazon Rekognition AWS Lambda function topic, for example, `ppe/alarm/on` and `ppe/alarm/off`.
-    > [!NOTE]
-    > Remember to clear “Use default topic prefix”.
-3. Repeat the subscription configuration for one more color so that the trigger from Amazon Rekognition can change color based on PPE detection.
+1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription, matching one of the message topics sent by the Amazon Rekognition AWS Lambda function.
+    - **Subscription filter**: `ppe/alarm/on`
+    - **Use default topic prefix**: `Unchecked`
+2. Add a second subscription, matching the other message topics sent by the Amazon Rekognition AWS Lambda function.
+    - **Subscription filter**: `ppe/alarm/off`
+    - **Use default topic prefix**: `Unchecked`
 
 #### Set up a strobe siren profile
 
@@ -276,9 +277,8 @@ This section explains how to set up MQTT subscribe in the strobe siren and tie t
 
 #### Set up an Event
 
-1. In the strobe siren, go to **System** > **Events** and add a rule.
-2. Tie the condition to MQTT stateless and the subscription created earlier.
-3. Tie the Action to the profile created earlier.
+1. In the strobe siren, go to **System** > **Events** and add a rule using the stateless MQTT subscription `ppe/alarm/on` to indicate that an alarm should sound, selecting one of the light and siren profiles as action.
+2. Create a second rule using the stateless MQTT subscription `ppe/alarm/off` to indicate that all is clear, selecting the other light and siren profile as action.
 
 ## Test and validation
 
