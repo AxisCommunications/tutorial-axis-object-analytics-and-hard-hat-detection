@@ -13,7 +13,7 @@
     - [AWS IoT Core and MQTT client](#aws-iot-core-and-mqtt-client)
     - [Amazon Rekognition PPE detection (inference)](#amazon-rekognition-ppe-detection-inference)
     - [AXIS Object Analytics (camera application) and event setup](#axis-object-analytics-camera-application-and-event-setup)
-    - [Strobe siren event and MQTT subscribe](#strobe-siren-event-and-mqtt-subscribe)
+    - [Strobe siren event and MQTT subscription](#strobe-siren-event-and-mqtt-subscription)
 - [Test and validation](#test-and-validation)
 - [Disclaimer](#disclaimer)
 - [License](#license)
@@ -28,8 +28,7 @@ Amazon Rekognition transfers the result to [AXIS D4100-E Network Strobe Siren](h
 
 The architectural overview below shows the required components (hardware and software) and protocols to set up the solution.
 
-> **Note**
->
+> [!NOTE]
 > You can replace some components to develop solutions for other use cases. For example, replace AXIS Object Analytics with another application to send images to AWS. Or replace the Axis strobe siren with an Axis door station to change the output and result of the solution.
 >
 > Modifying the AWS Lambda function that calls the Amazon Rekognition is also possible if the use case requires other detection types.
@@ -38,7 +37,7 @@ The architectural overview below shows the required components (hardware and sof
 
 ## Prerequisites
 
-- Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) - Click [here](https://www.axis.com/products/axis-object-analytics#compatible-products) to find compatible cameras.
+- Camera running [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) - Click [here](https://www.axis.com/products/axis-object-analytics#compatible-products) to find cameras featuring the *line crossing* scenario.
 - [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren)
 - Access to AWS - Amazon Rekognition isn't available in all regions. For this setup to work, select one of its [supported regions](https://docs.aws.amazon.com/general/latest/gr/rekognition.html).
 
@@ -47,10 +46,10 @@ The architectural overview below shows the required components (hardware and sof
 These are the main steps of this tutorial:
 
 - Camera image to Amazon Simple Storage Service (Amazon S3) bucket
-- AWS IoT Core, acting as a MQTT broker, and MQTT client
+- AWS IoT Core, acting as a MQTT broker
 - Amazon Rekognition PPE detection (inference)
 - AXIS Object Analytics (camera application) and event setup
-- Strobe siren event and MQTT subscribe
+- Strobe siren event and MQTT subscription
 
 ![architecture](assets/architecture.png)\
 *Detailed overview showing all cloud services.*
@@ -63,11 +62,12 @@ The image below illustrates the upload of a camera image to an Amazon S3 bucket.
 
 [Sending images from a camera to Amazon S3](https://github.com/AxisCommunications/acap-integration-examples-aws/tree/main/images-to-aws-s3) describes how to set up the Amazon S3 and the required peripheral services to handle the authentication.
 
-> **Note** Follow the instructions up until the section called **Configure the camera**. Afterward, return to this tutorial to set up the rest of the solution.
+> [!NOTE]
+> Follow the instructions up until the section called **Configure the camera**. Keep note on the AWS CloudFormation stack output parameters named `Recipient`, `AccessToken` and `Bucket` as you will need them later on in this tutorial.
 
 ### AWS IoT Core and MQTT client
 
-In this section we'll set up AWS IoT Core and connect it to the MQTT client in the Axis strobe siren.
+In this section we'll set up AWS IoT Core and have the Axis strobe siren connect to it using its MQTT client.
 
 ![AWS IoT Core](assets/aws-iot-core.png)
 
@@ -78,19 +78,24 @@ In this section we'll set up AWS IoT Core and connect it to the MQTT client in t
 3. Select **Create single thing** and click **Next**.
 4. Enter a unique name and click **Next**.
 5. On the **Configure device certificate** page, select **Auto-generate a new certificate** and click **Next**.
-6. Create a new policy or attach an existing one to the certificate. You're redirected to a new page if you create a new policy. For this tutorial, create a new policy with two statements:
+6. Create a new policy or attach an existing one to the certificate. You're redirected to a new page if you create a new policy. For this tutorial, create a new policy with three statements:
     - First statement
         - **Policy effect**: `Allow`
         - **Policy action**: `iot:Connect`
         - **Policy resource**: `*`
     - Second statement
         - **Policy effect**: `Allow`
-        - **Policy action**: `iot:Publish`
+        - **Policy action**: `iot:Subscribe`
+        - **Policy resource**: `*`
+    - Third statement
+        - **Policy effect**: `Allow`
+        - **Policy action**: `iot:Receive`
         - **Policy resource**: `*`
 
-    > **Warning** Not restricting the policy resource is acceptable in an exploratory phase, but applying [least-privilege permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege) is a requirement before going to production.
+    >[!WARNING]
+    > Not restricting the policy resource is acceptable in an exploratory phase, but applying [least-privilege permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege) is a requirement before going to production.
 
-7. Return to the previous page to attach the applicable policies and click **Create thing**.
+7. Return to the previous page to attach the applicable policy and click **Create thing**.
 8. Download the **Device certificate**, **Public key file**, **Private key file** and the **Root CA certificate**.
 
     ![download aws certificates](assets/aws-download-certificates.png)\
@@ -98,9 +103,9 @@ In this section we'll set up AWS IoT Core and connect it to the MQTT client in t
 
 9. Click **Done**.
 
-#### Set up an MQTT client in an Axis device
+#### Set up the MQTT client in the Axis strobe siren
 
-In the Axis device, install the client and CA certificates to enable a secure MQTT connection to the AWS IoT Core:
+In the Axis strobe siren, install the client and CA certificates to enable a secure MQTT connection to AWS IoT Core:
 
 1. Log in to the Axis device and go to **System** > **Security**.
 2. Click **Add certificate**.
@@ -109,7 +114,7 @@ In the Axis device, install the client and CA certificates to enable a secure MQ
 5. Click **Install** and then **Close**.
 6. Click **Add certificate** again and select **Upload a CA certificate**.
 7. Upload the root CA certificate (`AmazonRootCA1.pem`).
-8. Click **Next** and then **Install**.
+8. Click **Next** and then **Install** and **Close**.
 
 Next, configure the device's MQTT client:
 
@@ -139,68 +144,69 @@ This section explains how to set up and configure the AWS Lambda function to gra
 2. Create a new AWS Lambda function.
     - Select **Author from scratch**.
     - Set a name for the function.
-    - Select **Node.js 14.x** as runtime.
+    - Select **Node.js 18.x** as runtime.
     - Select **x86_64** as architecture.
     - Click **Create function**.
 
 #### Set up the AWS Lambda function
 
 1. Add a trigger to the Amazon S3 bucket where you store the uploaded images.
-2. Add the code below to the `index.js` file within your AWS Lambda function.
+2. Add the code below to the `index.mjs` file within your AWS Lambda function.
 
     ```javascript
-    const AWS = require("aws-sdk");
+    import { RekognitionClient, DetectProtectiveEquipmentCommand } from "@aws-sdk/client-rekognition";
+    import { IoTDataPlaneClient, PublishCommand } from "@aws-sdk/client-iot-data-plane";
 
     const BUCKET_NAME = process.env.BUCKET_NAME;
     const IOT_CORE_DEVICE_DATA_ENDPOINT = process.env.IOT_CORE_DEVICE_DATA_ENDPOINT;
 
-    const rekognition = new AWS.Rekognition();
-    const iotData = new AWS.IotData({
-    endpoint: IOT_CORE_DEVICE_DATA_ENDPOINT,
+    const rekognitionClient = new RekognitionClient();
+    const ioTDataPlaneClient = new IoTDataPlaneClient({
+        endpoint: `https://${IOT_CORE_DEVICE_DATA_ENDPOINT}`,
     });
 
     const anyPersonWithoutProtectiveEquipment = async (objectKey) => {
-    const req = {
-        Image: {
-        S3Object: {
-            Bucket: BUCKET_NAME,
-            Name: objectKey,
-        },
-        },
-        SummarizationAttributes: {
-        MinConfidence: 50,
-        RequiredEquipmentTypes: ["HEAD_COVER"],
-        },
-    };
+        const input = {
+            Image: {
+                S3Object: {
+                    Bucket: BUCKET_NAME,
+                    Name: objectKey,
+                },
+            },
+            SummarizationAttributes: {
+                MinConfidence: 50,
+                RequiredEquipmentTypes: ["HEAD_COVER"],
+            },
+        };
 
-    const res = await rekognition.detectProtectiveEquipment(req).promise();
-    return res.Summary.PersonsWithoutRequiredEquipment.length > 0;
+        const command = new DetectProtectiveEquipmentCommand(input);
+
+        const res = await rekognitionClient.send(command);
+        return res.Summary.PersonsWithoutRequiredEquipment.length > 0;
     };
 
     const publishMessage = async (alarm) => {
-    const message = {
-        topic: alarm ? "ppe/alarm/on" : "ppe/alarm/off",
-        payload: JSON.stringify({ message: "PPE detection payload" }),
+        const input = {
+            topic: alarm ? "ppe/alarm/on" : "ppe/alarm/off",
+            payload: JSON.stringify({ message: "PPE detection payload" }),
+        };
+
+        const command = new PublishCommand(input);
+
+        await ioTDataPlaneClient.send(command);
     };
 
-    await iotData.publish(message).promise();
-    };
+    export const handler = async (event) => {
+        if (!event || !event.Records || event.Records.length !== 1) {
+            console.log(`unexpected event structure: ${JSON.stringify(event)}`);
+            return;
+        }
 
-    const handler = async (event) => {
-    if (!event || !event.Records || event.Records.length !== 1) {
-        console.log(`unexpected event structure: ${JSON.stringify(event)}`);
-        return;
-    }
+        const objectKey = event.Records[0].s3.object.key;
+        console.log(`bucket: ${BUCKET_NAME}, object key: ${objectKey}`);
 
-    const objectKey = event.Records[0].s3.object.key;
-    console.log(`bucket: ${BUCKET_NAME}, object key: ${objectKey}`);
-
-    const alarm = await anyPersonWithoutProtectiveEquipment(objectKey);
-    await publishMessage(alarm);
-    };
-
-    module.exports = {
-    handler,
+        const alarm = await anyPersonWithoutProtectiveEquipment(objectKey);
+        await publishMessage(alarm);
     };
     ```
 
@@ -211,29 +217,27 @@ This section explains how to set up and configure the AWS Lambda function to gra
 
 #### AWS Lambda function permissions
 
-Finally, set up the correct permissions for the AWS Lambda function to access the Amazon S3 bucket, AWS IoT Core and Amazon Rekognition.
+Finally, set up the correct permissions for the AWS Lambda function to access the Amazon S3 bucket, Amazon Rekognition and AWS IoT Core.
 
-1. Go to **Configuration** > **Permissions** and click the **Execution role**.
-2. In the **IAM** (Identity and Access Management) console, add permissions for the three services:
-    - Amazon S3 (`s3:GetObject` and `s3:GetObjectVersion`)
-    - Amazon Rekognition (`rekognition:DetectProtectiveEquipment`)
-    - AWS IoT Core (`iot:Publish`)
-3. Select **Attach policies** from the **add permissions** dropdown.
-4. Click **Create Policy** and add Amazon S3 as a service and read access to `GetObject` and `GetObjectVersion`.
-5. Click **next** > **next** until you can set a name for your policy.
-6. Save the policy and attach the policy to your role.
-
-Create two more policies (one for Amazon Rekognition and one for AWS IoT Core) and attach them to your AWS Lambda function role.
-
-- The Amazon Rekognition policy should have at least read access to the `rekognition:DetectProtectiveEquipment` action.
-- The AWS IoT Core policy should have write access to the `iot:Publish` action.
+1. Go to **Configuration** > **Permissions** and click the **Role name** in **Execution role**.
+2. In the **IAM** (Identity and Access Management) role, select **Create inline policy** from the **Add permissions** dropdown.
+3. Specify the following permissions and create the policy:
+    - **Service**: `S3`
+        - `GetObject`
+        - `GetObjectVersion`
+    - **Service**: `Rekognition`
+        - `DetectProtectiveEquipment`
+    - **Service**: `IoT`
+        - `Publish`
+4. With the policy created and attached to the role, you're done configuring the AWS Lambda permissions.
 
 ### AXIS Object Analytics (camera application) and event setup
 
 #### Line Crossing in AXIS Object Analytics
 
-1. In the Axis camera, go to **Apps** and click **open** to start the AXIS Object Analytics application.
-2. Set up a line crossing scenario where you want to capture an image and send it to Amazon S3.
+1. In the Axis camera, go to **Apps** and make sure that the application named `AXIS Object Analytics` is running.
+2. Click **Open** to configure the application.
+3. Set up a line crossing scenario where you want to capture an image and send it to Amazon S3.
 
 ![AXIS Object Analytic - Line crossing](assets/axis-line-crossing.png)\
 *Example of a line crossing scenario in AXIS Object Analytics*
@@ -243,42 +247,66 @@ Create two more policies (one for Amazon Rekognition and one for AWS IoT Core) a
 Now it is time to set up an HTTPS recipient to the Amazon API Gateway and an event that triggers an image upload.
 
 1. In the Axis camera go to **System** > **Events**.
-2. On the **Recipients** tab click **+** to add the Amazon API Gateway recipient URL.
-    > **Note** You don't need to enter a username and password here. The access token `accessToken` in the **Rules** section under **Custom CGI parameters** handles the authentication.
-3. On the **Rules** tab click **+** to add a new rule.
-    - Select a condition for sending an image to Amazon S3, for example, **AXIS Object Analytics: Scenario x**.
-    - Set the post buffer to 1 second and the **Maximum images** to 1.
-    - Add the `accessToken` under **Custom CGI parameters**, for example, `accessToken=abcdefghijklmnopqrstuvxyz123`
+2. On the **Recipients** tab click **Add recipient**, pointing to the Amazon API Gateway.
+    - **Name**: `AWS S3`
+    - **Type**: `HTTPS`
+    - **URL**: The AWS CloudFormation stack output parameter named `Recipient`, from back when we created the Amazon S3 bucket.
+3. On the **Rules** tab click **Add a rule** with the following settings:
+    - **Name**: `AXIS Object Analytics: Line crossing`
+    - **Condition**: The Object Analytics scenario created in AXIS Object Analytics
+    - **Action**: `Send images through HTTPS`
+        - **Recipient**: `AWS S3`
+        - **Maximum images**: `1`
+        - **Custom CGI parameters**: The AWS CloudFormation stack output parameter named `AccessToken` points to a secret in AWS Secrets Manager. Follow the link, retrieve the secret value and format it according to `accessToken=<secret value>`. E.g. if the secret value is `FooBar` then the value you should enter here is `accessToken=FooBar`. Please note that copying the secret from AWS Secrets Manager sometimes adds a space in the beginning of the secret. Please make sure to remove this space before saving the rule.
 
 The camera will now send an image every time a person crosses the line that you created in AXIS Object Analytics.
 
-### Strobe siren event and MQTT subscribe
+### Strobe siren event and MQTT subscription
 
-This section explains how to set up MQTT subscribe in the strobe siren and tie the MQTT topic to different events that control the strobe siren's light or sound.
+This section explains how to set up the MQTT subscription in the Axis strobe siren and tie the MQTT topic to different events that control the strobe siren's light or sound.
 
-#### Set up MQTT subscribe
+#### Set up MQTT subscription
 
-1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription.
-2. Set an MQTT topic that corresponds to the Amazon Rekognition AWS Lambda function topic, for example, `ppe/alarm/on` and `ppe/alarm/off`.
-    > **Note** Remember to clear “Use default topic prefix”.
-3. Repeat the subscription configuration for one more color so that the trigger from Amazon Rekognition can change color based on PPE detection.
+1. In the strobe siren under **System** > **MQTT** go to **MQTT subscriptions** and add a new subscription, matching one of the message topics sent by the Amazon Rekognition AWS Lambda function.
+    - **Subscription filter**: `ppe/alarm/on`
+    - **Use default topic prefix**: `Unchecked`
+2. Add a second subscription, matching the other message topics sent by the Amazon Rekognition AWS Lambda function.
+    - **Subscription filter**: `ppe/alarm/off`
+    - **Use default topic prefix**: `Unchecked`
 
 #### Set up a strobe siren profile
 
 1. In the strobe siren add a new profile, give it a name (example `green-light`), and configure the desired signaling.
 2. Create a second profile for some other color or sound (example `red-light`).
 
-#### Set up an Event
+#### Set up an event
 
-1. In the strobe siren, go to **System** > **Events** and add a rule.
-2. Tie the condition to MQTT stateless and the subscription created earlier.
-3. Tie the Action to the profile created earlier.
+1. In the strobe siren, go to **System** > **Events** and add a rule with the following settings:
+    - **Name**: `Alarm on`
+    - **Condition**:
+        - **Type**: `Stateless`
+        - **Subscription filter**: `ppe/alarm/on`
+        - **Use device topic prefix**: `Unchecked`
+    - **Action**
+        - **Type**: `Run light and siren profile`
+        - **Profile**: `red-light`
+        - **Action**: `Start`
+2. Add a second rule with the following settings:
+    - **Name**: `Alarm off`
+    - **Condition**:
+        - **Type**: `Stateless`
+        - **Subscription filter**: `ppe/alarm/off`
+        - **Use device topic prefix**: `Unchecked`
+    - **Action**
+        - **Type**: `Run light and siren profile`
+        - **Profile**: `green-light`
+        - **Action**: `Start`
 
 ## Test and validation
 
 To test the solution, trigger the line crossing in AXIS Object Analytics. The Axis strobe siren should light up red or green, depending on whether you're wearing a helmet.
 
-To check the MQTT messages sent to AWS IoT Core, log in to the AWS Management Console and go to AWS IoT Core. You can see all the messages if you subscribe with the wildcard `#`.
+To check the MQTT messages sent to AWS IoT Core, log in to the AWS Management Console and navigate to the MQTT test client in AWS IoT Core. You can see all messages published to the broker if you subscribe using the wildcard `#`.
 
 ![AWS MQTT test client](assets/aws-mqtt-test-client.png)\
 *Screenshot from AWS Management Console*
