@@ -78,7 +78,7 @@ In this section we'll set up AWS IoT Core and have the Axis strobe siren connect
 3. Select **Create single thing** and click **Next**.
 4. Enter a unique name and click **Next**.
 5. On the **Configure device certificate** page, select **Auto-generate a new certificate** and click **Next**.
-6. Create a new policy or attach an existing one to the certificate. You're redirected to a new page if you create a new policy. For this tutorial, create a new policy with two statements:
+6. Create a new policy or attach an existing one to the certificate. You're redirected to a new page if you create a new policy. For this tutorial, create a new policy with three statements:
     - First statement
         - **Policy effect**: `Allow`
         - **Policy action**: `iot:Connect`
@@ -86,6 +86,10 @@ In this section we'll set up AWS IoT Core and have the Axis strobe siren connect
     - Second statement
         - **Policy effect**: `Allow`
         - **Policy action**: `iot:Subscribe`
+        - **Policy resource**: `*`
+    - Second statement
+        - **Policy effect**: `Allow`
+        - **Policy action**: `iot:Receive`
         - **Policy resource**: `*`
 
     >[!WARNING]
@@ -275,16 +279,34 @@ This section explains how to set up the MQTT subscription in the Axis strobe sir
 1. In the strobe siren add a new profile, give it a name (example `green-light`), and configure the desired signaling.
 2. Create a second profile for some other color or sound (example `red-light`).
 
-#### Set up an Event
+#### Set up an event
 
-1. In the strobe siren, go to **System** > **Events** and add a rule using the stateless MQTT subscription `ppe/alarm/on` to indicate that an alarm should sound, selecting one of the light and siren profiles as action.
-2. Create a second rule using the stateless MQTT subscription `ppe/alarm/off` to indicate that all is clear, selecting the other light and siren profile as action.
+1. In the strobe siren, go to **System** > **Events** and add a rule with the following settings:
+    - **Name**: `Alarm on`
+    - **Condition**:
+        - **Type**: `Stateless`
+        - **Subscription filter**: `ppe/alarm/on`
+        - **Use device topic prefix**: `Unchecked`
+    - **Action**
+        - **Type**: `Run light and siren profile`
+        - **Profile**: `red-light`
+        - **Action**: `Start`
+2. Add a second rule with the following settings:
+    - **Name**: `Alarm off`
+    - **Condition**:
+        - **Type**: `Stateless`
+        - **Subscription filter**: `ppe/alarm/off`
+        - **Use device topic prefix**: `Unchecked`
+    - **Action**
+        - **Type**: `Run light and siren profile`
+        - **Profile**: `green-light`
+        - **Action**: `Start`
 
 ## Test and validation
 
 To test the solution, trigger the line crossing in AXIS Object Analytics. The Axis strobe siren should light up red or green, depending on whether you're wearing a helmet.
 
-To check the MQTT messages sent to AWS IoT Core, log in to the AWS Management Console and go to AWS IoT Core. You can see all the messages if you subscribe with the wildcard `#`.
+To check the MQTT messages sent to AWS IoT Core, log in to the AWS Management Console and navigate to the MQTT test client in AWS IoT Core. You can see all messages published to the broker if you subscribe using the wildcard `#`.
 
 ![AWS MQTT test client](assets/aws-mqtt-test-client.png)\
 *Screenshot from AWS Management Console*
