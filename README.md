@@ -87,7 +87,7 @@ In this section we'll set up AWS IoT Core and have the Axis strobe siren connect
         - **Policy effect**: `Allow`
         - **Policy action**: `iot:Subscribe`
         - **Policy resource**: `*`
-    - Second statement
+    - Third statement
         - **Policy effect**: `Allow`
         - **Policy action**: `iot:Receive`
         - **Policy resource**: `*`
