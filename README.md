@@ -20,7 +20,7 @@
 
 ## Overview
 
-Hybrid machine learning refers to the use of edge computing (on-premise) for initial data processing, and then sending the more compute-intensive tasks to the cloud for deeper analysis. This approach is commonly used in scenarios where you might want to reduce the amount of data sent to the cloud, manage latency, or address privacy and security concerns.
+Hybrid machine learning refers to the use of edge computing (on-premise) for initial data processing (in this setup within the camera), and then sending the more compute-intensive tasks to the cloud for deeper analysis. This approach is commonly used in scenarios where you might want to reduce the amount of data sent to the cloud, manage latency, or address privacy and security concerns.
 
 This tutorial describes a solution that uses [AXIS Object Analytics](https://www.axis.com/products/axis-object-analytics) on the Axis camera to do the initial data processing, only sending images to [Amazon Web Services (AWS)](https://aws.amazon.com/) when people enters the scene. Pre-trained models in [Amazon Rekognition](https://aws.amazon.com/rekognition/) assesses that the people are using personal protective equipment (PPE), such as a helmet. The inference result is sent to [AXIS D4100-E Network Strobe Siren](https://www.axis.com/products/axis-d4100-e-network-strobe-siren) via MQTT, that either signals green to indicate that the helmet is on and red to indicate that the helmet is off.
 
