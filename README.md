@@ -1,6 +1,9 @@
 *©2023 Axis Communications AB. AXIS COMMUNICATIONS, AXIS, ARTPEC and VAPIX are registered trademarks of Axis AB in various jurisdictions. All other trademarks are the property of their respective owners.*
 
 <!-- omit from toc -->
+# This tutorial has been archived, and its content moved to [Axis Developer Documentation](https://developer.axis.com/computer-vision/how-to-guides/build-hard-hat-detection-using-axis-object-analytics-and-amazon-recognition)
+
+<!-- omit from toc -->
 # Hybrid machine learning - Hard hat detection using AXIS Object Analytics and Amazon Rekognition
 
 <!-- omit from toc -->
